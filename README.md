@@ -2,16 +2,17 @@
 redhat cluster fence agent for vmware esxi over SSH using "vim-cmd"  for power management
 fence_vmware_soap replacement. No vcenter required.
 # Usage
-You need installed fence-agents rpm on cluster VMs
-copy fence_vmware_ssh to /usr/sbin on cluster VMs
+You need installed fence-agents rpm on cluster VMs  
+copy fence_vmware_ssh to /usr/sbin on cluster VMs  
 enable ssh on esxi host
-test fencing on VM with name 'test':
-$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o list
-$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o status -n test
-$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o reboot -n test
-$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o reboot -n test -m cycle
-$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o on -n test
-$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o off -n test
+
+test fencing on VM with name 'test':  
+$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o list  
+$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o status -n test  
+$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o reboot -n test  
+$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o reboot -n test -m cycle  
+$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o on -n test  
+$ fence_vmware_ssh -a 192.168.1.10 -l root -p pass -o off -n test  
 
 modify cluster.conf like:
 ```html
