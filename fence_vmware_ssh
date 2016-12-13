@@ -8,8 +8,6 @@ from fencing import fail_usage
 
 #BEGIN_VERSION_GENERATION
 RELEASE_VERSION="4.0.15"
-BUILD_DATE="(built Wed Dec 16 04:41:44 EST 2015)"
-REDHAT_COPYRIGHT="Copyright (C) Red Hat, Inc. 2004-2010 All rights reserved."
 #END_VERSION_GENERATION
 
 outlets_cache = None
