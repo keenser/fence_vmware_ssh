@@ -1,0 +1,94 @@
+#!/usr/bin/python -tt
+
+import sys, re
+import atexit
+sys.path.append("/usr/share/fence")
+from fencing import *
+from fencing import fail_usage
+
+#BEGIN_VERSION_GENERATION
+RELEASE_VERSION="4.0.15"
+BUILD_DATE="(built Wed Dec 16 04:41:44 EST 2015)"
+REDHAT_COPYRIGHT="Copyright (C) Red Hat, Inc. 2004-2010 All rights reserved."
+#END_VERSION_GENERATION
+
+outlets_cache = None
+def get_outlets_status(conn, options):
+	global outlets_cache
+	if outlets_cache is None:
+		outlets = {}
+		conn.send_eol("vim-cmd vmsvc/getallvms")
+		conn.log_expect(options["--command-prompt"], int(options["--shell-timeout"]))
+		list_re = re.compile(r"^(\d+)\s+(\S+)\s+.*", re.IGNORECASE)
+		for line in conn.before.splitlines():
+			s = list_re.search(line)
+			if s:
+				outlets[s.group(2)] = (s.group(1), "")
+		outlets_cache = outlets
+	return outlets_cache
+
+def get_power_status(conn, options):
+	outlets = get_outlets_status(conn, options)
+
+	if not options["--plug"] in outlets:
+		fail_usage("Failed: You have to enter existing name of virtual machine!")
+	else:
+		conn.send_eol("vim-cmd vmsvc/power.getstate " + outlets[options["--plug"]][0])
+		re_state = re.compile('Powered (on|off)', re.IGNORECASE)
+		conn.log_expect(re_state, int(options["--shell-timeout"]))
+		status = conn.match.group(1).lower()
+		conn.log_expect(options["--command-prompt"], int(options["--shell-timeout"]))
+		return status
+
+def set_power_status(conn, options):
+	outlets = get_outlets_status(conn, options)
+	if not options["--plug"] in outlets:
+		fail_usage("Failed: You have to enter existing name of virtual machine!")
+	else:
+		if options["--action"] == "on":
+			command = "power.on"
+		else:
+			command = "power.off"
+
+		conn.send_eol("vim-cmd vmsvc/" + command + " " + outlets[options["--plug"]][0])
+		conn.log_expect(options["--command-prompt"], int(options["--power-timeout"]))
+	return
+
+def reboot_cycle(conn, options):
+	outlets = get_outlets_status(conn, options)
+	if not options["--plug"] in outlets:
+		fail_usage("Failed: You have to enter existing name of virtual machine!")
+	else:
+		conn.send_eol("vim-cmd vmsvc/power.reset " + outlets[options["--plug"]][0])
+		conn.log_expect(options["--command-prompt"], int(options["--power-timeout"]))
+		return bool(re.search('Reset VM', conn.before))
+
+def main():
+	device_opt = ["ipaddr", "login", "passwd", "secure", "cmd_prompt", "method", "port"]
+
+	atexit.register(atexit_handler)
+
+	all_opt["secure"]["default"] = "1"
+	all_opt["cmd_prompt"]["default"] = re.compile("\[.+@.+\] ", re.IGNORECASE)
+	all_opt["method"]["default"] = "onoff"
+
+	options = check_input(device_opt, process_input(device_opt))
+
+	docs = {}
+	docs["shortdesc"] = "Fence agent for vmware esxi over SSH"
+	docs["longdesc"] = "fence_vmware_ssh is a fence agent that connects to vmware esxi host. It logs into \
+host via ssh and reboot a specified vm using vim-cmd. "
+	show_docs(options, docs)
+
+	options["eol"] = "\r"
+
+	conn = fence_login(options)
+
+	##
+	## Fence operations
+	####
+	result = fence_action(conn, options, set_power_status, get_power_status, get_outlets_status, reboot_cycle)
+	fence_logout(conn, "exit")
+
+if __name__ == "__main__":
+	main()
