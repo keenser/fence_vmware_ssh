@@ -20,20 +20,20 @@ modify cluster.conf like:
               <clusternode name="node1" nodeid="1" votes="1">
                       <fence>
                               <method name="1">
-                                      <device name="vmware1"/>
+                                      <device name="vmware1" port="VMname1"/>
                               </method>
                       </fence>
               </clusternode>
               <clusternode name="node2" nodeid="2" votes="1">
                       <fence>
                               <method name="1">
-                                      <device name="vmware2"/>
+                                      <device name="vmware2" port="VMname2"/>
                               </method>
                       </fence>
               </clusternode>
       </clusternodes>
       <fencedevices>
-              <fencedevice agent="fence_vmware_ssh" ipaddr="esxi host IP" login="root" passwd="pass" name="vmware1" port="VMname1"/>
-              <fencedevice agent="fence_vmware_ssh" ipaddr="esxi host IP" login="root" passwd="pass" name="vmware2" port="VMname2"/>
+              <fencedevice agent="fence_vmware_ssh" ipaddr="esxi host IP" login="root" auth="password" passwd="pass" name="vmware1"/>
+              <fencedevice agent="fence_vmware_ssh" ipaddr="esxi host IP" login="root" auth="password" passwd="pass" name="vmware2"/>
       </fencedevices>
 ```

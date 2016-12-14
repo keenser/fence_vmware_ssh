@@ -69,15 +69,17 @@ def main():
 	atexit.register(atexit_handler)
 
 	all_opt["secure"]["default"] = "1"
-	all_opt["cmd_prompt"]["default"] = re.compile("\[.+@.+\] ", re.IGNORECASE)
+	all_opt["cmd_prompt"]["default"] = "\[.+@.+\] "
 	all_opt["method"]["default"] = "onoff"
 
 	options = check_input(device_opt, process_input(device_opt))
+	options["--command-prompt"] = re.compile(options["--command-prompt"], re.IGNORECASE)
 
 	docs = {}
 	docs["shortdesc"] = "Fence agent for vmware esxi over SSH"
 	docs["longdesc"] = "fence_vmware_ssh is a fence agent that connects to vmware esxi host. It logs into \
 host via ssh and reboot a specified vm using vim-cmd. "
+	docs["vendorurl"] = "http://www.vmware.com"
 	show_docs(options, docs)
 
 	options["eol"] = "\r"
